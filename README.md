@@ -3,6 +3,7 @@
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/matiziompl/DayFlow/refs/heads/main/screenshots/preview.png">
 </h1>
+
 # DayFlow — Daily Task Tracker 🎯
 
 An elegant mobile application (PWA) for tracking daily habits with a progress calendar.
