@@ -46,7 +46,7 @@ On Mobile (Web App)
 
     Go to PWABuilder.com.
 
-    Paste your site URL (e.g., https://matiziompl.github.io/dayflow/).
+    Paste your site URL (e.g., https://matiziompl.github.io/DayFlow/).
 
     Click Start → select Android → Download APK.
 
