@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.matiziompl.twa",
+        "sha256_cert_fingerprints": ["24:40:C3:4B:62:63:0C:6E:45:72:6B:1E:24:F1:13:52:1C:87:94:1A:35:9B:4B:BC:33:C0:84:99:E3:F6:F4:F9"]
+      }
+    }]
