@@ -1,7 +1,7 @@
-DayFlow — Daily Task Tracker 🎯
+# DayFlow — Daily Task Tracker 🎯
 
 An elegant mobile application (PWA) for tracking daily habits with a progress calendar.
-✨ Features
+## ✨ Features
 
     📋 Task List — Permanent daily tasks with checkboxes.
 
@@ -27,7 +27,7 @@ An elegant mobile application (PWA) for tracking daily habits with a progress ca
 
     📱 PWA — Fully installable on mobile devices.
 
-🚀 Installation
+## 🚀 Installation
 On Mobile (Web App)
 
     Open the site in Chrome (Android) or Safari (iOS).
@@ -36,7 +36,7 @@ On Mobile (Web App)
 
     Done! The app works just like a native one.
 
-As an APK
+## As an APK
 
     Go to PWABuilder.com.
 
@@ -46,11 +46,12 @@ As an APK
 
     Install the APK on your phone.
 
-Locally
+## Locally
 
 Simply open index.html in any web browser — no server or Node.js required.
-📁 Structure
+## 📁 Structure
 
+```text
 dayflow/
 ├── index.html      # HTML structure
 ├── style.css       # Styling (dark mode, animations)
@@ -59,16 +60,18 @@ dayflow/
 ├── sw.js           # Service Worker (offline support)
 ├── icon.png        # App icon
 └── README.md       # This file
+```
 
-🎨 Themes
+## 🎨 Themes
+```text
 Theme	Color
-🌙 Midnight	Emerald
-🌊 Ocean	Azure
-🌅 Sunset	Orange
-🌲 Forest	Lime
-💜 Lavender	Purple
-🌸 Sakura	Pink
-⚡ Monokai	Gold
-📄 License
-
+ 🌙     Midnight Emerald
+ 🌊     Ocean Azure
+ 🌅     Sunset Orange
+ 🌲     Forest Lime
+ 💜     Lavender Purple
+ 🌸     Sakura Pink
+ ⚡     Monokai Gold
+```
+## 📄 License
 MIT — Feel free to use it however you want!
