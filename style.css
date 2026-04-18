@@ -267,16 +267,26 @@ html, body {
     border-color: var(--border);
 }
 .sponsors-title {
-    font-size: 11px;
+    font-size: 16px;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    margin-bottom: 12px;
-    font-weight: 600;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+.sponsors-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
 }
 .sponsor-logo {
-    max-width: 150px;
+    max-width: 100px;
+    max-height: 60px;
+    width: auto;
     height: auto;
+    object-fit: contain;
     opacity: 0.85;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
     transition: var(--tr);
