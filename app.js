@@ -11,9 +11,9 @@ const THEMES = {
 };
 
 const App = {
-    tasks: [], history: {}, currentTab: 'today', currentTheme: 'midnight',
+    tasks: [], history: {}, settings: { dayOffsetHours: 0 }, currentTab: 'today', currentTheme: 'midnight',
     calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
-    celebrationShown: false, expandedTasks: new Set(), modalSubtasks: [], dom: {},
+    celebrationShown: false, expandedTasks: new Set(), modalSubtasks: [], editingTaskName: null, historyDateKey: null, dom: {},
 
     init() {
         this.cacheDom(); this.loadData(); this.loadTheme(); this.render(); this.bindEvents(); this.registerSW();
@@ -27,6 +27,7 @@ const App = {
             taskList: $('task-list'), emptyState: $('empty-state'), btnAdd: $('btn-add-task'),
             modalOverlay: $('modal-overlay'), modal: $('modal'), taskInput: $('new-task-input'),
             taskDesc: $('new-task-desc'), subtaskInput: $('new-subtask-input'), modalSubtaskList: $('modal-subtask-list'),
+            taskStartDate: $('new-task-start-date'), taskEndDate: $('new-task-end-date'),
             btnAddSubtask: $('btn-add-subtask'), btnCancel: $('btn-cancel'), btnConfirm: $('btn-confirm'),
             navBtns: document.querySelectorAll('.nav-btn'),
             tabToday: $('tab-today'), tabCalendar: $('tab-calendar'),
@@ -35,6 +36,8 @@ const App = {
             celebration: $('celebration'),
             weekdayPicker: $('weekday-picker'), intervalPicker: $('interval-picker'), intervalDays: $('interval-days'),
             btnTheme: $('btn-theme'), themeOverlay: $('theme-overlay'), themeGrid: $('theme-grid'), btnCloseTheme: $('btn-close-theme'),
+            btnSettings: $('btn-settings'), settingsOverlay: $('settings-overlay'), settingDayOffset: $('setting-day-offset'), btnCloseSettings: $('btn-close-settings'),
+            historyOverlay: $('history-overlay'), historyDateTitle: $('history-date-title'), historyTaskList: $('history-task-list'), historyEmptyState: $('history-empty-state'), btnCloseHistory: $('btn-close-history')
         };
     },
 
@@ -45,31 +48,33 @@ const App = {
             if (raw) {
                 const d = JSON.parse(raw);
                 if (d.tasks?.length && typeof d.tasks[0] === 'string') {
-                    this.tasks = d.tasks.map(n => ({ name: n, schedule: { type: 'daily' }, description: '', subtasks: [] }));
+                    this.tasks = d.tasks.map(n => ({ name: n, schedule: { type: 'daily' }, description: '', subtasks: [], startDate: '', endDate: '' }));
                 } else {
-                    this.tasks = (d.tasks || []).map(t => ({ ...t, description: t.description || '', subtasks: t.subtasks || [] }));
+                    this.tasks = (d.tasks || []).map(t => ({ ...t, description: t.description || '', subtasks: t.subtasks || [], startDate: t.startDate || '', endDate: t.endDate || '' }));
                 }
                 this.history = d.history || {};
+                this.settings = d.settings || { dayOffsetHours: 0 };
+                if (this.dom.settingDayOffset) this.dom.settingDayOffset.value = this.settings.dayOffsetHours;
                 this.saveData();
             } else {
                 this.tasks = [
-                    { name: 'Rozciąganie', schedule: { type: 'daily' }, description: 'Poranny zestaw rozciągania', subtasks: ['Kręgosłup', 'Hamstringi', 'Barki', 'Biodra', 'Łydki'] },
-                    { name: 'Trening', schedule: { type: 'weekdays', days: [1,3,5] }, description: 'Plan siłowy A/B', subtasks: ['Rozgrzewka', 'Ćwiczenia główne', 'Cardio'] },
-                    { name: 'Czytanie', schedule: { type: 'daily' }, description: '', subtasks: [] },
-                    { name: 'Pij wodę (8 szklanek)', schedule: { type: 'daily' }, description: '', subtasks: [] },
-                    { name: 'Medytacja', schedule: { type: 'interval', every: 2, startDate: new Date().toISOString().slice(0,10) }, description: '10 min mindfulness', subtasks: [] }
+                    { name: 'Rozciąganie', schedule: { type: 'daily' }, description: 'Poranny zestaw rozciągania', subtasks: ['Kręgosłup', 'Hamstringi', 'Barki', 'Biodra', 'Łydki'], startDate: '', endDate: '' },
+                    { name: 'Trening', schedule: { type: 'weekdays', days: [1,3,5] }, description: 'Plan siłowy A/B', subtasks: ['Rozgrzewka', 'Ćwiczenia główne', 'Cardio'], startDate: '', endDate: '' },
+                    { name: 'Czytanie', schedule: { type: 'daily' }, description: '', subtasks: [], startDate: '', endDate: '' },
+                    { name: 'Pij wodę (8 szklanek)', schedule: { type: 'daily' }, description: '', subtasks: [], startDate: '', endDate: '' },
+                    { name: 'Medytacja', schedule: { type: 'interval', every: 2, startDate: new Date().toISOString().slice(0,10) }, description: '10 min mindfulness', subtasks: [], startDate: '', endDate: '' }
                 ];
-                this.history = {}; this.saveData();
+                this.history = {}; this.settings = { dayOffsetHours: 0 }; this.saveData();
             }
-        } catch(e) { this.tasks = []; this.history = {}; }
+        } catch(e) { this.tasks = []; this.history = {}; this.settings = { dayOffsetHours: 0 }; }
     },
 
     saveData() {
-        try { localStorage.setItem('dayflow-data', JSON.stringify({ tasks: this.tasks, history: this.history })); } catch(e) {}
+        try { localStorage.setItem('dayflow-data', JSON.stringify({ tasks: this.tasks, history: this.history, settings: this.settings })); } catch(e) {}
     },
 
     // === Dates ===
-    getTodayKey() { return this.dateToKey(new Date()); },
+    getTodayKey() { const d = new Date(); d.setHours(d.getHours() - (this.settings.dayOffsetHours || 0)); return this.dateToKey(d); },
     dateToKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; },
     keyToDate(k) { const [y,m,d] = k.split('-').map(Number); return new Date(y,m-1,d); },
     formatDate(d) {
@@ -82,6 +87,8 @@ const App = {
 
     // === Schedule ===
     isScheduledForDate(task, dateKey) {
+        if (task.startDate && dateKey < task.startDate) return false;
+        if (task.endDate && dateKey > task.endDate) return false;
         const s = task.schedule;
         if (!s || s.type === 'daily') return true;
         const date = this.keyToDate(dateKey);
@@ -178,13 +185,34 @@ const App = {
         if (status === 'completed' && !this.celebrationShown) { this.celebrationShown = true; this.celebrate(); }
         if (status !== 'completed') this.celebrationShown = false;
     },
-    addTask(name, schedule, description, subtasks) {
-        const trimmed = name.trim(); if (!trimmed || this.tasks.some(t => t.name === trimmed)) return false;
-        this.tasks.push({ name: trimmed, schedule: schedule || { type: 'daily' }, description: description || '', subtasks: subtasks || [] });
+    saveTask(oldName, name, schedule, description, subtasks, startDate, endDate) {
+        const trimmed = name.trim(); if (!trimmed) return false;
+        if (oldName !== trimmed && this.tasks.some(t => t.name === trimmed)) return false;
+        let task;
+        if (oldName) {
+            task = this.tasks.find(t => t.name === oldName);
+            if (!task) return false;
+            if (oldName !== trimmed) {
+                Object.keys(this.history).forEach(dk => {
+                    if (this.history[dk] && oldName in this.history[dk]) {
+                        this.history[dk][trimmed] = this.history[dk][oldName];
+                        delete this.history[dk][oldName];
+                    }
+                });
+            }
+            task.name = trimmed; task.schedule = schedule || { type: 'daily' };
+            task.description = description || ''; task.subtasks = subtasks || [];
+            task.startDate = startDate || ''; task.endDate = endDate || '';
+        } else {
+            task = { name: trimmed, schedule: schedule || { type: 'daily' }, description: description || '', subtasks: subtasks || [], startDate: startDate || '', endDate: endDate || '' };
+            this.tasks.push(task);
+        }
         const dk = this.getTodayKey();
-        if (this.isScheduledForDate(this.tasks[this.tasks.length-1], dk)) {
+        if (this.isScheduledForDate(task, dk)) {
             if (!this.history[dk]) this.history[dk] = {};
-            this.history[dk][trimmed] = subtasks?.length ? (() => { const o = {}; subtasks.forEach(s => o[s]=false); return o; })() : false;
+            if (!(trimmed in this.history[dk])) {
+                this.history[dk][trimmed] = subtasks?.length ? (() => { const o = {}; subtasks.forEach(s => o[s]=false); return o; })() : false;
+            }
         }
         this.saveData(); this.renderTasks(); this.updateProgress(); return true;
     },
@@ -193,6 +221,74 @@ const App = {
         const dk = this.getTodayKey(); if (this.history[dk]) delete this.history[dk][taskName];
         this.expandedTasks.delete(taskName);
         this.saveData(); this.renderTasks(); this.updateProgress(); this.updateStreak();
+    },
+
+    openHistoryModal(dateKey) {
+        this.historyDateKey = dateKey;
+        this.dom.historyDateTitle.textContent = this.formatDate(this.keyToDate(dateKey));
+        this.renderHistoryTasks();
+        this.dom.historyOverlay.classList.add('visible');
+    },
+    closeHistoryModal() {
+        this.dom.historyOverlay.classList.remove('visible');
+        this.historyDateKey = null;
+        this.renderCalendar();
+    },
+    renderHistoryTasks() {
+        const dk = this.historyDateKey;
+        const list = this.dom.historyTaskList; list.innerHTML = '';
+        const scheduledTasks = this.getTasksForDate(dk);
+        if (!scheduledTasks.length) { this.dom.historyEmptyState.style.display = 'block'; this.dom.historyEmptyState.innerHTML = '<p>Brak zadań w tym dniu.</p>'; return; }
+        this.dom.historyEmptyState.style.display = 'none';
+        scheduledTasks.forEach((task) => {
+            const val = this.history[dk]?.[task.name];
+            let isDone = false;
+            if (typeof val === 'boolean') isDone = val;
+            if (typeof val === 'object' && val) { const v = Object.values(val); isDone = v.length > 0 && v.every(x => x); }
+            const hasSub = task.subtasks?.length > 0;
+            const li = document.createElement('li');
+            li.className = `task-item${isDone ? ' completed' : ''}${hasSub ? ' has-subtasks' : ''}`;
+            const descH = task.description ? `<span class="task-description">${this.esc(task.description)}</span>` : '';
+            let progH = '', subH = '';
+            if (hasSub) {
+                const st = {}; task.subtasks.forEach(s => st[s] = (val && typeof val === 'object' && val[s]) ? true : false);
+                const dn = Object.values(st).filter(v=>v).length;
+                progH = `<span class="subtask-progress">${dn}/${task.subtasks.length}</span>`;
+                subH = `<div class="subtask-list" style="max-height: 500px; opacity: 1;"><div class="subtask-list-inner">${task.subtasks.map(s => {
+                    const sd = st[s];
+                    return `<div class="subtask-item${sd?' done':''}"><label class="subtask-checkbox"><input type="checkbox" ${sd?'checked':''} data-task="${this.esc(task.name)}" data-subtask="${this.esc(s)}" data-history="true"><span class="subtask-checkmark"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/></svg></span></label><span class="subtask-name">${this.esc(s)}</span></div>`;
+                }).join('')}</div></div>`;
+            }
+            li.innerHTML = `<div class="task-main"><label class="task-checkbox"><input type="checkbox" ${isDone?'checked':''} data-task="${this.esc(task.name)}" data-history="true"><span class="checkmark"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span></label><div class="task-info"><div class="task-name-row"><span class="task-name">${this.esc(task.name)}</span>${progH}</div>${descH}</div></div>${subH}`;
+            list.appendChild(li);
+        });
+    },
+    toggleHistoryTask(taskName) {
+        const dk = this.historyDateKey; if (!this.history[dk]) this.history[dk] = {};
+        const task = this.tasks.find(t => t.name === taskName);
+        if (task?.subtasks?.length) {
+            const val = this.history[dk][taskName];
+            let isDone = false; if (typeof val === 'object' && val) { const v = Object.values(val); isDone = v.length > 0 && v.every(x => x); }
+            this.history[dk][taskName] = {};
+            task.subtasks.forEach(st => { this.history[dk][taskName][st] = !isDone; });
+        } else {
+            const scheduled = this.getTasksForDate(dk);
+            scheduled.forEach(t => { if (!(t.name in this.history[dk])) this.history[dk][t.name] = false; });
+            this.history[dk][taskName] = !this.history[dk][taskName];
+        }
+        this.saveData(); this.renderHistoryTasks(); 
+        if (dk === this.getTodayKey()) { this.renderTasks(); this.updateProgress(); this.updateStreak(); }
+    },
+    toggleHistorySubtask(taskName, subtaskName) {
+        const dk = this.historyDateKey; if (!this.history[dk]) this.history[dk] = {};
+        const task = this.tasks.find(t => t.name === taskName);
+        if (typeof this.history[dk][taskName] !== 'object' || !this.history[dk][taskName]) {
+            this.history[dk][taskName] = {};
+            (task?.subtasks || []).forEach(st => { this.history[dk][taskName][st] = false; });
+        }
+        this.history[dk][taskName][subtaskName] = !this.history[dk][taskName][subtaskName];
+        this.saveData(); this.renderHistoryTasks();
+        if (dk === this.getTodayKey()) { this.renderTasks(); this.updateProgress(); this.updateStreak(); }
     },
 
     // === Theme ===
@@ -260,7 +356,9 @@ const App = {
                 }).join('')}</div></div>`;
             }
             const expBtn = hasSub ? `<button class="btn-expand" data-task="${this.esc(task.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>` : '';
-            li.innerHTML = `<div class="task-main"><label class="task-checkbox"><input type="checkbox" ${isDone?'checked':''} data-task="${this.esc(task.name)}"><span class="checkmark"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span></label><div class="task-info"><div class="task-name-row"><span class="task-name">${this.esc(task.name)}</span>${progH}</div>${descH}${badgeH}</div>${expBtn}<button class="btn-delete" data-task="${this.esc(task.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>${subH}`;
+            const editBtn = `<button class="btn-edit" data-task="${this.esc(task.name)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></button>`;
+            const delBtn = `<button class="btn-delete" data-task="${this.esc(task.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+            li.innerHTML = `<div class="task-main"><label class="task-checkbox"><input type="checkbox" ${isDone?'checked':''} data-task="${this.esc(task.name)}"><span class="checkmark"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span></label><div class="task-info"><div class="task-name-row"><span class="task-name">${this.esc(task.name)}</span>${progH}</div>${descH}${badgeH}</div><div class="task-actions">${editBtn}${expBtn}${delBtn}</div></div>${subH}`;
             list.appendChild(li);
         });
     },
@@ -274,6 +372,7 @@ const App = {
         for(let d=1;d<=dim;d++) {
             const c=document.createElement('div'); c.className='calendar-day'; c.textContent=d;
             const dt=new Date(y,m,d), dk=this.dateToKey(dt), isT=dk===tk, isF=dt>today&&!isT;
+            c.dataset.date = dk;
             if(isT) c.classList.add('today');
             if(isF) { c.classList.add('future'); }
             else { const s=this.getDayStatus(dk); if(s==='completed'){c.classList.add('completed');cd++;tp++;} else if(s==='partial'){c.classList.add('partial');tp++;} else if(s==='none'){tp++;} }
@@ -294,12 +393,35 @@ const App = {
     },
 
     // === Modals ===
-    openModal() {
-        this.dom.modalOverlay.classList.add('visible'); this.dom.taskInput.value=''; this.dom.taskDesc.value='';
-        this.modalSubtasks=[]; this.renderModalSubtasks();
-        const dr=this.dom.modal.querySelector('input[name="schedule"][value="daily"]'); if(dr)dr.checked=true;
-        this.dom.weekdayPicker.querySelectorAll('.weekday-btn').forEach(b=>{const d=parseInt(b.dataset.day);b.classList.toggle('selected',d>=1&&d<=5);});
-        this.dom.intervalDays.value='2'; this.dom.weekdayPicker.classList.remove('visible'); this.dom.intervalPicker.classList.remove('visible');
+    openModal(taskName) {
+        this.dom.modalOverlay.classList.add('visible');
+        if (typeof taskName === 'string') {
+            this.editingTaskName = taskName;
+            const t = this.tasks.find(x => x.name === taskName);
+            this.dom.taskInput.value = t.name;
+            this.dom.taskDesc.value = t.description || '';
+            this.modalSubtasks = [...(t.subtasks || [])];
+            this.dom.taskStartDate.value = t.startDate || '';
+            this.dom.taskEndDate.value = t.endDate || '';
+            this.dom.btnConfirm.textContent = 'Zapisz';
+            const s = t.schedule || {type: 'daily'};
+            const dr=this.dom.modal.querySelector(`input[name="schedule"][value="${s.type}"]`); if(dr)dr.checked=true;
+            this.dom.weekdayPicker.querySelectorAll('.weekday-btn').forEach(b=>{const d=parseInt(b.dataset.day);b.classList.toggle('selected',s.days?.includes(d));});
+            this.dom.intervalDays.value = s.every || 2;
+        } else {
+            this.editingTaskName = null;
+            this.dom.taskInput.value=''; this.dom.taskDesc.value='';
+            this.modalSubtasks=[];
+            this.dom.taskStartDate.value = ''; this.dom.taskEndDate.value = '';
+            this.dom.btnConfirm.textContent = 'Dodaj';
+            const dr=this.dom.modal.querySelector('input[name="schedule"][value="daily"]'); if(dr)dr.checked=true;
+            this.dom.weekdayPicker.querySelectorAll('.weekday-btn').forEach(b=>{const d=parseInt(b.dataset.day);b.classList.toggle('selected',d>=1&&d<=5);});
+            this.dom.intervalDays.value='2'; 
+        }
+        this.renderModalSubtasks();
+        const sel = this.dom.modal.querySelector('input[name="schedule"]:checked')?.value || 'daily';
+        this.dom.weekdayPicker.classList.toggle('visible', sel==='weekdays');
+        this.dom.intervalPicker.classList.toggle('visible', sel==='interval');
         setTimeout(()=>this.dom.taskInput.focus(),300);
     },
     closeModal() { this.dom.modalOverlay.classList.remove('visible'); },
@@ -312,7 +434,8 @@ const App = {
     },
     confirmAdd() {
         const name=this.dom.taskInput.value.trim(); if(!name) return;
-        if(this.addTask(name,this.getScheduleFromModal(),this.dom.taskDesc.value.trim(),this.modalSubtasks.slice())) this.closeModal();
+        const sd = this.dom.taskStartDate.value; const ed = this.dom.taskEndDate.value;
+        if(this.saveTask(this.editingTaskName, name,this.getScheduleFromModal(),this.dom.taskDesc.value.trim(),this.modalSubtasks.slice(), sd, ed)) this.closeModal();
         else { this.dom.modal.style.animation='none'; this.dom.modal.offsetHeight; this.dom.modal.style.animation='shake 0.4s ease'; }
     },
     addModalSubtask() {
@@ -356,20 +479,46 @@ const App = {
             if(cb){e.preventDefault();this.toggleTask(cb.dataset.task);return;}
             const exp=e.target.closest('.btn-expand');
             if(exp){const n=exp.dataset.task;this.expandedTasks.has(n)?this.expandedTasks.delete(n):this.expandedTasks.add(n);this.renderTasks();return;}
+            const edit=e.target.closest('.btn-edit');
+            if(edit){this.openModal(edit.dataset.task);return;}
             const del=e.target.closest('.btn-delete');
             if(del){const it=del.closest('.task-item');it.style.transform='translateX(100%)';it.style.opacity='0';setTimeout(()=>this.removeTask(del.dataset.task),250);return;}
             const ti=e.target.closest('.task-main');
-            if(ti&&!e.target.closest('.btn-delete')&&!e.target.closest('.btn-expand')){const c=ti.querySelector('.task-checkbox input');if(c)this.toggleTask(c.dataset.task);}
+            if(ti&&!e.target.closest('.btn-delete')&&!e.target.closest('.btn-expand')&&!e.target.closest('.btn-edit')){const c=ti.querySelector('.task-checkbox input');if(c)this.toggleTask(c.dataset.task);}
+        });
+        this.dom.historyTaskList.addEventListener('click',e=>{
+            const stCb=e.target.closest('.subtask-checkbox input');
+            if(stCb){e.preventDefault();this.toggleHistorySubtask(stCb.dataset.task,stCb.dataset.subtask);return;}
+            const cb=e.target.closest('.task-checkbox input');
+            if(cb){e.preventDefault();this.toggleHistoryTask(cb.dataset.task);return;}
+            const ti=e.target.closest('.task-main');
+            if(ti){const c=ti.querySelector('.task-checkbox input');if(c)this.toggleHistoryTask(c.dataset.task);}
+        });
+        this.dom.calendarGrid.addEventListener('click',e=>{
+            const day = e.target.closest('.calendar-day');
+            if (day && !day.classList.contains('empty')) {
+                this.openHistoryModal(day.dataset.date);
+            }
         });
         this.dom.navBtns.forEach(b=>b.addEventListener('click',()=>this.switchTab(b.dataset.tab)));
         this.dom.btnPrev.addEventListener('click',()=>{this.calendarMonth--;if(this.calendarMonth<0){this.calendarMonth=11;this.calendarYear--;}this.renderCalendar();});
         this.dom.btnNext.addEventListener('click',()=>{this.calendarMonth++;if(this.calendarMonth>11){this.calendarMonth=0;this.calendarYear++;}this.renderCalendar();});
-        document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(this.dom.themeOverlay.classList.contains('visible'))this.dom.themeOverlay.classList.remove('visible');else if(this.dom.modalOverlay.classList.contains('visible'))this.closeModal();}});
-        // Theme
+        document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(this.dom.themeOverlay.classList.contains('visible'))this.dom.themeOverlay.classList.remove('visible');else if(this.dom.modalOverlay.classList.contains('visible'))this.closeModal();else if(this.dom.historyOverlay.classList.contains('visible'))this.closeHistoryModal();else if(this.dom.settingsOverlay.classList.contains('visible'))this.dom.settingsOverlay.classList.remove('visible');}});
+        // Theme & Settings
         this.dom.btnTheme.addEventListener('click',()=>{this.renderThemeGrid();this.dom.themeOverlay.classList.add('visible');});
         this.dom.btnCloseTheme.addEventListener('click',()=>this.dom.themeOverlay.classList.remove('visible'));
         this.dom.themeOverlay.addEventListener('click',e=>{if(e.target===this.dom.themeOverlay)this.dom.themeOverlay.classList.remove('visible');});
         this.dom.themeGrid.addEventListener('click',e=>{const c=e.target.closest('.theme-card');if(c){this.applyTheme(c.dataset.theme);this.renderThemeGrid();}});
+        
+        this.dom.btnSettings.addEventListener('click',()=>this.dom.settingsOverlay.classList.add('visible'));
+        this.dom.btnCloseSettings.addEventListener('click',()=>{
+            this.settings.dayOffsetHours = parseInt(this.dom.settingDayOffset.value) || 0;
+            this.saveData(); this.render(); this.dom.settingsOverlay.classList.remove('visible');
+        });
+        this.dom.settingsOverlay.addEventListener('click',e=>{if(e.target===this.dom.settingsOverlay)this.dom.settingsOverlay.classList.remove('visible');});
+        
+        this.dom.btnCloseHistory.addEventListener('click',()=>this.closeHistoryModal());
+        this.dom.historyOverlay.addEventListener('click',e=>{if(e.target===this.dom.historyOverlay)this.closeHistoryModal();});
         // Swipe
         let sx=0; const mc=document.getElementById('main-content');
         mc.addEventListener('touchstart',e=>{sx=e.changedTouches[0].screenX;},{passive:true});

@@ -295,3 +295,22 @@ html, body {
     opacity: 1;
     transform: translateY(-2px) scale(1.03);
 }
+
+/* Settings & Dates */
+.date-inputs { display: flex; gap: 12px; margin-top: 8px; }
+.date-input-group { display: flex; flex-direction: column; flex: 1; }
+.date-label { font-size: 0.8rem; color: #a1a1aa; margin-bottom: 4px; }
+input[type="date"] { color-scheme: dark; }
+
+/* Edit / Settings Buttons */
+.btn-edit { background: none; border: none; color: #a1a1aa; cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+.btn-edit:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.task-actions { display: flex; gap: 4px; }
+
+/* Calendar clicks */
+.calendar-day { cursor: pointer; transition: transform 0.1s, background 0.2s; }
+.calendar-day:hover:not(.empty) { transform: scale(1.1); z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+
+/* History View Modal */
+#history-date-title { color: var(--accent); margin-bottom: 16px; text-transform: capitalize; }
+.history-tasks-container { max-height: 50vh; overflow-y: auto; margin-bottom: 16px; padding-right: 4px; }

@@ -24,6 +24,7 @@
                 <p id="header-date"></p>
             </div>
             <div class="header-right">
+                <button class="header-btn" id="btn-settings" aria-label="Ustawienia">⚙️</button>
                 <button class="header-btn" id="btn-theme" aria-label="Zmień motyw">🎨</button>
                 <div class="streak-badge" id="streak-badge">
                     <span class="streak-fire">🔥</span>
@@ -142,6 +143,20 @@
                     </div>
                 </div>
 
+                <div class="modal-field date-range-field">
+                    <label class="modal-label">Widoczność zadania <span class="opt">(opcjonalnie)</span></label>
+                    <div class="date-inputs">
+                        <div class="date-input-group">
+                            <span class="date-label">Od:</span>
+                            <input type="date" id="new-task-start-date" class="interval-input">
+                        </div>
+                        <div class="date-input-group">
+                            <span class="date-label">Do:</span>
+                            <input type="date" id="new-task-end-date" class="interval-input">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="schedule-section">
                     <p class="schedule-label">Powtarzaj:</p>
                     <div class="schedule-options">
@@ -186,6 +201,33 @@
                 <h3>Wybierz motyw</h3>
                 <div class="theme-grid" id="theme-grid"></div>
                 <button id="btn-close-theme" class="btn-secondary" style="width:100%;margin-top:16px;">Zamknij</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-overlay" class="modal-overlay">
+            <div class="modal">
+                <h3>Ustawienia</h3>
+                <div class="modal-field">
+                    <label class="modal-label">Koniec doby (godzina)</label>
+                    <p class="opt" style="margin-top:-6px;margin-bottom:8px;font-size:0.85rem">Jeśli ustawisz 3, dzień w aplikacji skończy się o 3:00 rano następnego dnia.</p>
+                    <input type="number" id="setting-day-offset" min="0" max="12" value="0" class="interval-input" style="width: 100%">
+                </div>
+                <div class="modal-actions" style="margin-top: 24px;">
+                    <button id="btn-close-settings" class="btn-primary" style="width:100%;">Zapisz i Zamknij</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div id="history-overlay" class="modal-overlay">
+            <div class="modal">
+                <h3 id="history-date-title">Data</h3>
+                <div class="history-tasks-container">
+                    <ul id="history-task-list" class="task-list"></ul>
+                    <div id="history-empty-state" class="empty-state" style="display:none;"></div>
+                </div>
+                <button id="btn-close-history" class="btn-primary" style="width:100%;">Zamknij</button>
             </div>
         </div>
 

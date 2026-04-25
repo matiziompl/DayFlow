@@ -79,5 +79,17 @@ Theme	Color
  🌸     Sakura Pink
  ⚡     Monokai Gold
 ```
+## 🛠 Troubleshooting (APK URL Bar & Android Widgets)
+
+**Removing the URL Bar in APK (Trusted Web Activity)**
+If you see the browser address bar in your APK, it means the Digital Asset Links verification failed. To fix this:
+1. Extract your APK's SHA-256 fingerprint (from the keystore you used to sign it).
+2. Update the `sha256_cert_fingerprints` array in `.well-known/assetlinks.json`.
+3. Ensure your site (where `assetlinks.json` is hosted) is deployed and matches the exact domain the APK opens.
+
+**Android Home Screen Widgets**
+Currently, DayFlow is built as a pure web application (PWA). Standard PWAs do not have the capability to create native Android home screen widgets (like a 1x1 streak widget or a vertical task list). 
+To achieve native Android widgets, the project would need to be migrated to or wrapped in a native Android environment (like Android Studio / Java / Kotlin or Capacitor with native plugins) instead of relying solely on a web wrapper.
+
 ## 📄 License
 MIT — Feel free to use it however you want!
