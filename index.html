@@ -6,233 +6,303 @@
     <meta name="theme-color" content="#08080d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="DayFlow — Codzienny tracker zadań z kalendarzem postępów">
-    <title>DayFlow — Tracker Zadań</title>
+    <meta name="description" content="DayFlow — śledź codzienne nawyki i buduj streak">
+    <title>DayFlow — Daily Tracker</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <header id="header">
-            <div class="header-left">
-                <h1>DayFlow</h1>
-                <p id="header-date"></p>
-            </div>
-            <div class="header-right">
-                <button class="header-btn" id="btn-settings" aria-label="Ustawienia">⚙️</button>
-                <button class="header-btn" id="btn-theme" aria-label="Zmień motyw">🎨</button>
-                <div class="streak-badge" id="streak-badge">
-                    <span class="streak-fire">🔥</span>
-                    <span class="streak-count" id="streak-count">0</span>
-                </div>
-            </div>
-        </header>
+<div id="app">
 
-        <main id="main-content">
-            <!-- Today Tab -->
-            <section id="tab-today" class="tab-panel active">
-                <div class="progress-container">
-                    <div class="progress-ring-wrapper">
-                        <svg class="progress-ring" viewBox="0 0 140 140">
-                            <defs>
-                                <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="var(--accent-bright)"/>
-                                    <stop offset="100%" stop-color="var(--accent)"/>
-                                </linearGradient>
-                            </defs>
-                            <circle class="progress-ring-bg" cx="70" cy="70" r="58" fill="none" stroke-width="8"/>
-                            <circle class="progress-ring-fill" cx="70" cy="70" r="58" fill="none" stroke-width="8"
-                                    stroke-dasharray="364.42" stroke-dashoffset="364.42"/>
-                        </svg>
-                        <div class="progress-text">
-                            <span class="progress-percent" id="progress-percent">0%</span>
-                            <span class="progress-label">ukończono</span>
-                        </div>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-left">
+            <h1>DayFlow</h1>
+            <p id="header-date"></p>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" id="btn-settings" aria-label="Ustawienia" title="Ustawienia">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
+            <button class="header-btn" id="btn-theme" aria-label="Zmień motyw" title="Motywy">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+                </svg>
+            </button>
+            <div class="streak-badge" id="streak-badge" role="button" tabindex="0" aria-label="Streak i lodowe tarcze">
+                <span class="streak-fire">🔥</span>
+                <span class="streak-count" id="streak-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+
+        <!-- TASKS TAB (global task manager) -->
+        <section id="tab-tasks" class="tab-panel">
+            <div class="tasks-section">
+                <div class="today-header">
+                    <div class="today-header-top">
+                        <h2 class="section-title">Wszystkie zadania</h2>
+                        <button id="btn-add-task-all" class="btn-add" aria-label="Dodaj zadanie">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
                     </div>
                 </div>
-                <div class="tasks-section">
-                    <div class="tasks-header">
-                        <h2>Zadania na dziś</h2>
+                <ul id="all-task-list" class="task-list"></ul>
+                <div id="all-empty-state" class="empty-state" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- TODAY TAB -->
+        <section id="tab-today" class="tab-panel active">
+            <div class="progress-section">
+                <div class="progress-ring-wrap">
+                    <svg class="progress-ring" width="120" height="120" viewBox="0 0 120 120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="58" fill="none" stroke-width="4"/>
+                        <circle class="progress-ring-fill" cx="60" cy="60" r="58" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="364.42" stroke-dashoffset="364.42" transform="rotate(-90 60 60)"/>
+                    </svg>
+                    <div class="progress-center">
+                        <span class="progress-percent" id="progress-percent">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tasks-section">
+                <div class="today-header">
+                    <div class="today-header-top">
+                        <h2 class="section-title">Dzisiaj</h2>
                         <button id="btn-add-task" class="btn-add" aria-label="Dodaj zadanie">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         </button>
                     </div>
-                    <ul id="task-list" class="task-list"></ul>
-                    <div class="empty-state" id="empty-state" style="display:none;"></div>
                 </div>
-            </section>
+                <ul id="task-list" class="task-list"></ul>
+                <div id="empty-state" class="empty-state" style="display:none;"></div>
+            </div>
+        </section>
 
-            <!-- Calendar Tab -->
-            <section id="tab-calendar" class="tab-panel">
-                <div class="calendar-header">
-                    <div class="calendar-nav">
-                        <button id="btn-prev-month" class="btn-nav" aria-label="Poprzedni miesiąc">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-                        </button>
-                        <h2 id="calendar-month-year"></h2>
-                        <button id="btn-next-month" class="btn-nav" aria-label="Następny miesiąc">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
-                    </div>
-                    <div class="calendar-stats" id="calendar-stats"></div>
+        <!-- CALENDAR TAB -->
+        <section id="tab-calendar" class="tab-panel">
+            <div class="calendar-section">
+                <div class="calendar-nav">
+                    <button class="cal-nav-btn" id="btn-prev-month" aria-label="Poprzedni miesiąc">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <h2 class="section-title" id="calendar-month-year"></h2>
+                    <button class="cal-nav-btn" id="btn-next-month" aria-label="Następny miesiąc">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
                 </div>
                 <div class="calendar-weekdays">
                     <span>Pn</span><span>Wt</span><span>Śr</span><span>Cz</span><span>Pt</span><span>Sb</span><span>Nd</span>
                 </div>
-                <div id="calendar-grid" class="calendar-grid"></div>
+                <div class="calendar-grid" id="calendar-grid"></div>
                 <div class="calendar-legend">
-                    <div class="legend-item"><span class="legend-dot completed"></span><span>Zrobione</span></div>
-                    <div class="legend-item"><span class="legend-dot partial"></span><span>Częściowo</span></div>
-                    <div class="legend-item"><span class="legend-dot today-marker"></span><span>Dzisiaj</span></div>
+                    <span class="legend-item"><span class="legend-dot completed"></span>Ukończony</span>
+                    <span class="legend-item"><span class="legend-dot partial"></span>Częściowy</span>
+                    <span class="legend-item"><span class="legend-dot frozen-dot"></span>Zamrożony</span>
                 </div>
-                
-                <div class="sponsors-section">
-                    <h3 class="sponsors-title">Sponsorzy:</h3>
-                    <div class="sponsors-grid">
-                        <img src="logotyp.png" alt="Sponsor" class="sponsor-logo">
-                        <img src="logowat.png" alt="Sponsor" class="sponsor-logo">
-                        <img src="logozenin.png" alt="Sponsor" class="sponsor-logo">
-                    </div>
+                <p class="calendar-stats" id="calendar-stats"></p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav">
+        <button class="nav-btn" data-tab="tasks" id="nav-tasks" aria-label="Wszystkie zadania">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            <span>Zadania</span>
+        </button>
+        <button class="nav-btn active" data-tab="today" id="nav-today" aria-label="Dziś">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Dziś</span>
+        </button>
+        <button class="nav-btn" data-tab="calendar" id="nav-calendar" aria-label="Kalendarz">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>Kalendarz</span>
+        </button>
+    </nav>
+
+    <!-- ADD / EDIT TASK MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <h3 id="modal-title">Nowe zadanie</h3>
+            <div class="modal-field">
+                <label class="modal-label">Nazwa zadania</label>
+                <input type="text" id="new-task-input" class="modal-input" placeholder="np. Bieganie 30 min" maxlength="80" autocomplete="off">
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">Opis (opcjonalnie)</label>
+                <textarea id="new-task-desc" class="modal-input modal-textarea" placeholder="Szczegóły zadania..." rows="2" maxlength="200"></textarea>
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">Harmonogram</label>
+                <div class="schedule-options">
+                    <label class="schedule-opt"><input type="radio" name="schedule" value="daily" checked><span>Codziennie</span></label>
+                    <label class="schedule-opt"><input type="radio" name="schedule" value="weekdays"><span>Wybrane dni</span></label>
+                    <label class="schedule-opt"><input type="radio" name="schedule" value="interval"><span>Co X dni</span></label>
                 </div>
-            </section>
-        </main>
-
-        <nav id="bottom-nav">
-            <button class="nav-btn active" data-tab="today" id="nav-today">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-                </svg>
-                <span>Dziś</span>
-            </button>
-            <button class="nav-btn" data-tab="calendar" id="nav-calendar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <span>Kalendarz</span>
-            </button>
-        </nav>
-
-        <!-- Add Task Modal -->
-        <div id="modal-overlay" class="modal-overlay">
-            <div class="modal" id="modal">
-                <h3>Nowe zadanie</h3>
-                <input type="text" id="new-task-input" placeholder="np. Rozciąganie" maxlength="50" autocomplete="off" spellcheck="false">
-
-                <div class="modal-field">
-                    <label class="modal-label">Opis <span class="opt">(opcjonalnie)</span></label>
-                    <textarea id="new-task-desc" placeholder="Krótki opis zadania..." maxlength="200" rows="2"></textarea>
+                <div class="weekday-picker" id="weekday-picker">
+                    <button class="weekday-btn" data-day="1">Pn</button>
+                    <button class="weekday-btn" data-day="2">Wt</button>
+                    <button class="weekday-btn" data-day="3">Śr</button>
+                    <button class="weekday-btn" data-day="4">Cz</button>
+                    <button class="weekday-btn" data-day="5">Pt</button>
+                    <button class="weekday-btn" data-day="6">Sb</button>
+                    <button class="weekday-btn" data-day="0">Nd</button>
                 </div>
-
-                <div class="modal-field">
-                    <label class="modal-label">Podzadania <span class="opt">(opcjonalnie)</span></label>
-                    <div id="modal-subtask-list" class="modal-subtask-list"></div>
-                    <div class="subtask-input-row">
-                        <input type="text" id="new-subtask-input" placeholder="np. Hamstringi" maxlength="40" autocomplete="off">
-                        <button type="button" id="btn-add-subtask" class="btn-add-small">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="modal-field date-range-field">
-                    <label class="modal-label">Widoczność zadania <span class="opt">(opcjonalnie)</span></label>
-                    <div class="date-inputs">
-                        <div class="date-input-group">
-                            <span class="date-label">Od:</span>
-                            <input type="date" id="new-task-start-date" class="interval-input">
-                        </div>
-                        <div class="date-input-group">
-                            <span class="date-label">Do:</span>
-                            <input type="date" id="new-task-end-date" class="interval-input">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="schedule-section">
-                    <p class="schedule-label">Powtarzaj:</p>
-                    <div class="schedule-options">
-                        <label class="schedule-option">
-                            <input type="radio" name="schedule" value="daily" checked>
-                            <span class="radio-custom"></span><span>Codziennie</span>
-                        </label>
-                        <label class="schedule-option">
-                            <input type="radio" name="schedule" value="weekdays">
-                            <span class="radio-custom"></span><span>W wybrane dni tygodnia</span>
-                        </label>
-                        <div class="weekday-picker" id="weekday-picker">
-                            <button type="button" class="weekday-btn selected" data-day="1">Pn</button>
-                            <button type="button" class="weekday-btn selected" data-day="2">Wt</button>
-                            <button type="button" class="weekday-btn selected" data-day="3">Śr</button>
-                            <button type="button" class="weekday-btn selected" data-day="4">Cz</button>
-                            <button type="button" class="weekday-btn selected" data-day="5">Pt</button>
-                            <button type="button" class="weekday-btn" data-day="6">Sb</button>
-                            <button type="button" class="weekday-btn" data-day="0">Nd</button>
-                        </div>
-                        <label class="schedule-option">
-                            <input type="radio" name="schedule" value="interval">
-                            <span class="radio-custom"></span><span>Co określoną liczbę dni</span>
-                        </label>
-                        <div class="interval-picker" id="interval-picker">
-                            <span>Co</span>
-                            <input type="number" id="interval-days" min="2" max="365" value="2" class="interval-input">
-                            <span>dni</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button id="btn-cancel" class="btn-secondary">Anuluj</button>
-                    <button id="btn-confirm" class="btn-primary">Dodaj</button>
+                <div class="interval-picker" id="interval-picker">
+                    <span class="opt">Powtarzaj co</span>
+                    <input type="number" id="interval-days" class="interval-input" min="2" max="365" value="2">
+                    <span class="opt">dni</span>
                 </div>
             </div>
-        </div>
-
-        <!-- Theme Modal -->
-        <div id="theme-overlay" class="modal-overlay">
-            <div class="modal theme-modal">
-                <h3>Wybierz motyw</h3>
-                <div class="theme-grid" id="theme-grid"></div>
-                <button id="btn-close-theme" class="btn-secondary" style="width:100%;margin-top:16px;">Zamknij</button>
-            </div>
-        </div>
-
-        <!-- Settings Modal -->
-        <div id="settings-overlay" class="modal-overlay">
-            <div class="modal">
-                <h3>Ustawienia</h3>
-                <div class="modal-field">
-                    <label class="modal-label">Koniec doby (godzina)</label>
-                    <p class="opt" style="margin-top:-6px;margin-bottom:8px;font-size:0.85rem">Jeśli ustawisz 3, dzień w aplikacji skończy się o 3:00 rano następnego dnia.</p>
-                    <input type="number" id="setting-day-offset" min="0" max="12" value="0" class="interval-input" style="width: 100%">
-                </div>
-                <div class="modal-actions" style="margin-top: 24px;">
-                    <button id="btn-close-settings" class="btn-primary" style="width:100%;">Zapisz i Zamknij</button>
+            <div class="modal-field">
+                <label class="modal-label">Widoczność zadania</label>
+                <div class="date-range-row">
+                    <div class="date-input-wrap">
+                        <label class="opt" for="new-task-start-date">Od kiedy</label>
+                        <input type="date" id="new-task-start-date" class="modal-input">
+                    </div>
+                    <div class="date-input-wrap">
+                        <label class="opt" for="new-task-end-date">Do kiedy</label>
+                        <input type="date" id="new-task-end-date" class="modal-input">
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- History Modal -->
-        <div id="history-overlay" class="modal-overlay">
-            <div class="modal">
-                <h3 id="history-date-title">Data</h3>
-                <div class="history-tasks-container">
-                    <ul id="history-task-list" class="task-list"></ul>
-                    <div id="history-empty-state" class="empty-state" style="display:none;"></div>
+            <div class="modal-field">
+                <label class="modal-label">Podzadania</label>
+                <div class="subtask-add-row">
+                    <input type="text" id="new-subtask-input" class="modal-input" placeholder="Dodaj podzadanie..." maxlength="60">
+                    <button id="btn-add-subtask" class="btn-add-subtask" aria-label="Dodaj podzadanie">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
                 </div>
-                <button id="btn-close-history" class="btn-primary" style="width:100%;">Zamknij</button>
+                <div id="modal-subtask-list" class="modal-subtask-list"></div>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-cancel" class="btn-secondary">Anuluj</button>
+                <button id="btn-confirm" class="btn-primary">Dodaj</button>
             </div>
         </div>
-
-        <div id="celebration" class="celebration"></div>
     </div>
-    <script src="app.js"></script>
+
+    <!-- THEME MODAL -->
+    <div class="modal-overlay" id="theme-overlay">
+        <div class="modal">
+            <h3>Wybierz motyw</h3>
+            <div class="theme-grid" id="theme-grid"></div>
+            <button id="btn-close-theme" class="btn-primary" style="width:100%;margin-top:16px;">Zamknij</button>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-overlay">
+        <div class="modal">
+            <h3>⚙️ Ustawienia</h3>
+
+            <div class="modal-field">
+                <label class="modal-label" for="setting-day-offset">Koniec doby (godzina przesunięcia)</label>
+                <p class="opt" style="margin-bottom:6px;">Np. wartość 3 = dzień kończy się o 3:00 w nocy</p>
+                <input type="number" id="setting-day-offset" class="interval-input" min="0" max="12" value="0" style="width:100%">
+            </div>
+
+            <div class="modal-field">
+                <label class="modal-label" for="setting-theme-mode">Tryb wyglądu</label>
+                <select id="setting-theme-mode" class="settings-select">
+                    <option value="dark">🌙 Ciemny</option>
+                    <option value="light">☀️ Jasny</option>
+                    <option value="system">💻 Systemowy</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label class="modal-label" for="setting-ice-days">🧊 Lodowa tarcza co X dni</label>
+                <p class="opt" style="margin-bottom:6px;">Co ile dni nabija się 1 ładunek Streak Freeze</p>
+                <input type="number" id="setting-ice-days" class="interval-input" min="1" max="365" value="7" style="width:100%">
+            </div>
+
+            <div class="modal-field">
+                <label class="modal-label">Dane aplikacji</label>
+                <div class="data-buttons">
+                    <button id="btn-export" class="btn-secondary data-btn">📤 Eksportuj</button>
+                    <label class="btn-secondary data-btn import-label" tabindex="0">
+                        📥 Importuj
+                        <input type="file" id="import-file" accept=".json" style="display:none">
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top:8px;">
+                <button id="btn-close-settings" class="btn-primary" style="width:100%;">Zapisz i zamknij</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY MODAL -->
+    <div class="modal-overlay" id="history-overlay">
+        <div class="modal">
+            <h3 id="history-date-title">Data</h3>
+            <div id="history-freeze-section" class="history-freeze-section" style="display:none;">
+                <button id="btn-history-freeze" class="btn-freeze-small">❄️ Zamroź ten dzień (zużyj tarczę)</button>
+            </div>
+            <div class="history-tasks-container">
+                <ul id="history-task-list" class="task-list"></ul>
+                <div id="history-empty-state" class="empty-state" style="display:none;"></div>
+            </div>
+            <button id="btn-close-history" class="btn-primary" style="width:100%;margin-top:12px;">Zamknij</button>
+        </div>
+    </div>
+
+    <!-- STREAK POPUP -->
+    <div class="modal-overlay" id="streak-overlay">
+        <div class="modal streak-popup">
+            <div class="streak-popup-header">
+                <div class="streak-popup-fire-row">
+                    <span class="streak-popup-fire-icon">🔥</span>
+                    <div class="streak-popup-info">
+                        <span class="streak-popup-count" id="streak-popup-count">0</span>
+                        <span class="streak-popup-label">dni z rzędu</span>
+                    </div>
+                </div>
+            </div>
+            <div class="streak-ice-section">
+                <div class="ice-stats-row">
+                    <span class="ice-icon">🧊</span>
+                    <div class="ice-info">
+                        <span class="ice-count-num" id="ice-count-display">0</span>
+                        <span class="ice-label">lodowych tarcz</span>
+                    </div>
+                </div>
+                <p class="ice-desc">Nowa tarcza co <strong id="ice-interval-display">7</strong> dni</p>
+            </div>
+            <button id="btn-streak-freeze" class="btn-freeze">❄️ Streak Freeze — dziś</button>
+            <button id="btn-close-streak" class="btn-secondary" style="width:100%;margin-top:8px;">Zamknij</button>
+        </div>
+    </div>
+
+    <!-- Celebration -->
+    <div id="celebration"></div>
+
+</div>
+<script src="app.js"></script>
 </body>
 </html>
